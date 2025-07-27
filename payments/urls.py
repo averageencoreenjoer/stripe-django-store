@@ -2,6 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('buy/<int:item_id>/', views.buy_item, name='buy_item'),
-    path('item/<int:item_id>/', views.item_detail, name='item_detail'),
+    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
+    path('create-payment-intent/<int:order_id>/', views.create_payment_intent, name='create_payment_intent'),
 ]

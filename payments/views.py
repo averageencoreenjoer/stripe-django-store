@@ -1,39 +1,39 @@
+import os
 import stripe
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+from .models import Item, Order
 from django.conf import settings
-from django.http import JsonResponse, Http404
-from django.shortcuts import get_object_or_404, render
-from .models import Item
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-def buy_item(request, item_id):
-    item = get_object_or_404(Item, pk=item_id)
-    try:
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {
-                        'name': item.name,
-                    },
-                    'unit_amount': int(item.price * 100),
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            success_url='https://example.com/success',
-            cancel_url='https://example.com/cancel',
-        )
-        return JsonResponse({'id': session.id})
-    except Exception as e:
-        return JsonResponse({'error': str(e)})
-
-
-def item_detail(request, item_id):
-    item = get_object_or_404(Item, pk=item_id)
-    return render(request, 'item.html', {
-        'item': item,
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    context = {
+        'order': order,
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
-    })
+    }
+    return render(request, 'order_detail.html', context)
+
+
+@csrf_exempt
+def create_payment_intent(request, order_id):
+    if request.method != 'POST':
+        return HttpResponseBadRequest('Only POST allowed')
+
+    order = get_object_or_404(Order, id=order_id)
+    amount = int(order.get_total() * 100)  # в центах
+    currency = order.get_currency()
+
+    try:
+        payment_intent = stripe.PaymentIntent.create(
+            amount=amount,
+            currency=currency,
+            automatic_payment_methods={'enabled': True},
+            metadata={'order_id': order.id},
+        )
+        return JsonResponse({'clientSecret': payment_intent['client_secret']})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

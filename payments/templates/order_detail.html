@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order {{ order.id }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+<h1>Order #{{ order.id }}</h1>
+<ul>
+    {% for item in order.items.all %}
+        <li>{{ item.name }} — {{ item.price }} {{ item.currency|upper }}</li>
+    {% endfor %}
+</ul>
+<p>Discount: {{ order.get_discount_amount }}</p>
+<p>Tax: {{ order.get_tax_amount }}</p>
+<p><strong>Total: {{ order.get_total }} {{ order.get_currency|upper }}</strong></p>
+
+<button id="pay-button">Pay</button>
+
+<script>
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const payBtn = document.getElementById('pay-button');
+
+    payBtn.addEventListener('click', async () => {
+        const response = await fetch('/create-payment-intent/{{ order.id }}/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        const clientSecret = data.clientSecret;
+
+        const {error} = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: {
+                    // Используй встроенный Stripe элемент (можно улучшить UI, но для теста этого достаточно)
+                },
+                billing_details: {
+                    name: 'Test User'
+                }
+            }
+        });
+
+        if (error) {
+            alert(error.message);
+        } else {
+            alert('Payment successful!');
+            // Тут можно добавить редирект или обновление страницы
+        }
+    });
+</script>
+</body>
+</html>
