@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buy {{ item.name }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <h1>{{ item.name }}</h1>
+    <p>{{ item.description }}</p>
+    <p>${{ item.price }}</p>
+    <button id="buy-button">Buy</button>
+
+    <script>
+        var stripe = Stripe('{{ stripe_public_key }}');
+        document.getElementById('buy-button').addEventListener('click', function () {
+            fetch('/buy/{{ item.id }}')
+            .then(response => response.json())
+            .then(data => {
+                return stripe.redirectToCheckout({ sessionId: data.id });
+            });
+        });
+    </script>
+</body>
+</html>
