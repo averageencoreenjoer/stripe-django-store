@@ -2,3 +2,4 @@ Django>=4.2
 stripe
 python-decouple
 gunicorn
+python-dotenv

@@ -1,86 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Buy {{ item.name }}</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 0 20px;
-      text-align: center;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
-    p.description {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-      color: #555;
-    }
-    p.price {
-      font-weight: bold;
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      color: #222;
-    }
-    button#buy-button {
-      background-color: #6772e5;
-      border: none;
-      color: white;
-      padding: 15px 40px;
-      font-size: 1.25rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button#buy-button:hover {
-      background-color: #5469d4;
-    }
-    button#buy-button:disabled {
-      background-color: #bbb;
-      cursor: not-allowed;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Buy {{ item.name }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        p.description {
+            font-size: 1.1em;
+            color: #555;
+        }
+        p.price {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #6772e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #5469d4;
+        }
+    </style><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Buy {{ item.name }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        p.description {
+            font-size: 1.1em;
+            color: #555;
+        }
+        p.price {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #6772e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #5469d4;
+        }
+    </style>
 </head>
 <body>
-  <h1>{{ item.name }}</h1>
-  <p class="description">{{ item.description }}</p>
-  <p class="price">{{ item.price }} {{ item.currency|default:"USD" }}</p>
-  <button id="buy-button">Buy</button>
+    <h1>{{ item.name }}</h1>
+    <p class="description">{{ item.description }}</p>
+    <p class="price">${{ item.price }}</p>
 
-  <script src="https://js.stripe.com/v3/"></script>
-  <script>
-    var stripe = Stripe('{{ stripe_public_key }}');
-    var buyButton = document.getElementById('buy-button');
+    <button id="buy-button">Buy</button>
 
-    buyButton.addEventListener('click', function() {
-      buyButton.disabled = true;
-      buyButton.textContent = 'Redirecting...';
+    <script>
+        const stripe = Stripe("{{ stripe_public_key }}");
 
-      fetch('/buy/{{ item.id }}')
-        .then(response => response.json())
-        .then(session => {
-          return stripe.redirectToCheckout({ sessionId: session.id });
-        })
-        .then(function (result) {
-          if (result.error) {
-            alert(result.error.message);
-            buyButton.disabled = false;
-            buyButton.textContent = 'Buy';
-          }
-        })
-        .catch(function (error) {
-          alert('Error: ' + error.message);
-          buyButton.disabled = false;
-          buyButton.textContent = 'Buy';
+        document.getElementById('buy-button').addEventListener('click', () => {
+            fetch('/buy/{{ item.id }}/')
+                .then(res => res.json())
+                .then(data => {
+                    return stripe.redirectToCheckout({ sessionId: data.id });
+                })
+                .then((result) => {
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Something went wrong.');
+                });
         });
-    });
-  </script>
+    </script>
+</body>
+</html>
+
+</head>
+<body>
+    <h1>{{ item.name }}</h1>
+    <p class="description">{{ item.description }}</p>
+    <p class="price">${{ item.price }}</p>
+
+    <button id="buy-button">Buy</button>
+
+    <script>
+        const stripe = Stripe("{{ stripe_public_key }}");
+
+        document.getElementById('buy-button').addEventListener('click', () => {
+            fetch('/buy/{{ item.id }}/')
+                .then(res => res.json())
+                .then(data => {
+                    return stripe.redirectToCheckout({ sessionId: data.id });
+                })
+                .then((result) => {
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Something went wrong.');
+                });
+        });
+    </script>
 </body>
 </html>

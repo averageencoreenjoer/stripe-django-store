@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Buy {{ item.name }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        p.description {
+            font-size: 1.1em;
+            color: #555;
+        }
+        p.price {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #6772e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #5469d4;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ item.name }}</h1>
+    <p class="description">{{ item.description }}</p>
+    <p class="price">${{ item.price }}</p>
+
+    <button id="buy-button">Buy</button>
+
+    <script>
+        const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+
+        document.getElementById('buy-button').addEventListener('click', () => {
+            fetch('/buy/{{ item.id }}/')
+                .then(res => res.json())
+                .then(data => {
+                    return stripe.redirectToCheckout({ sessionId: data.id });
+                })
+                .then((result) => {
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Something went wrong.');
+                });
+        });
+    </script>
+</body>
+</html>
