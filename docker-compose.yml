@@ -10,3 +10,4 @@ services:
       - .env
     volumes:
       - .:/app
+      - static_volume:/app/staticfiles
