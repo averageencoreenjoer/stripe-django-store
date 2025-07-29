@@ -4,7 +4,7 @@ from .models import Item, Order, Discount, Tax
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price', 'currency']
+    list_display = ['id', 'name', 'price', 'currency']
 
 
 @admin.register(Order)
