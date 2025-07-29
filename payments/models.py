@@ -1,7 +1,7 @@
 from django.db import models
 import stripe
 from django.conf import settings
-
+from decimal import Decimal
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -64,9 +64,9 @@ class Order(models.Model):
     def total_price(self):
         total = sum(item.price for item in self.items.all())
         if self.discount:
-            total *= (1 - self.discount.percent / 100)
+            total *= (Decimal('1') - (self.discount.percent / Decimal('100')))
         if self.tax:
-            total *= (1 + self.tax.percent / 100)
+            total *= (Decimal('1') + (self.tax.percent / Decimal('100')))
         return round(total, 2)
 
     def __str__(self):

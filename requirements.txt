@@ -3,3 +3,6 @@ stripe
 python-decouple
 gunicorn
 python-dotenv
+pytest
+pytest-django
+pytest-cov

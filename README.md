@@ -68,3 +68,44 @@ curl http://localhost:8000/item/1
 ```
 
 ---
+
+## Testing
+
+The project uses `pytest` together with the `pytest-django` plugin to easily run Django tests.
+
+### Installing dependencies for testing
+
+```bash
+pip install pytest pytest-django pytest-cov
+```
+
+### Running tests
+
+Before running tests, you need to specify the environment variable `DJANGO_SETTINGS_MODULE`:
+
+```bash
+export DJANGO_SETTINGS_MODULE=stripe_project.settings
+pytest -v payments/tests.py
+```
+
+Or you can run the command in one line:
+
+```bash
+DJANGO_SETTINGS_MODULE=stripe_project.settings pytest -v payments/tests.py
+```
+
+### Setting up pytest.ini
+
+For convenience, create a file `pytest.ini` in the root of the project with the following contents, so as not to specify the environment variable every times:
+
+```ini
+[pytest]
+DJANGO_SETTINGS_MODULE = stripe_project.settings
+python_files = tests.py test_*.py *_tests.py
+```
+
+After that, tests can be run simply with the command:
+
+```bash
+pytest -v payments/tests.py
+```
