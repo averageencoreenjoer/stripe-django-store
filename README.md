@@ -25,7 +25,7 @@ Simple e-commerce backend on Django with Stripe Checkout integration.
 ```bash
 git clone https://github.com/averageencoreenjoer/stripe-django-store.git
 cd stripe-checkout-store
-cp .env.example .env
+nano .env
 docker-compose up --build
 ````
 
